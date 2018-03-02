@@ -1,7 +1,7 @@
 import os
 import tarfile
 from six.moves import urllib
-
+import pandas as pd
 
 DOWNLOAD_ROOT = 'https://raw.githubusercontent.com/ageron/handson-ml/master/'
 HOUSING_PATH = 'datasets/housing'
@@ -18,4 +18,6 @@ def fetch_housing_data(housing_url=HOUSING_URL, housing_path=HOUSING_PATH):
     housing_tgz.close()
 
 
-fetch_housing_data(HOUSING_URL, HOUSING_PATH)
+def load_housing_data(housing_path=HOUSING_PATH):
+    csv_path = os.path.join(housing_path, 'housing.csv')
+    return pd.read_csv(csv_path)
