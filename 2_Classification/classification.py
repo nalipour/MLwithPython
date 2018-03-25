@@ -12,6 +12,7 @@ from sklearn.metrics import precision_recall_curve, roc_curve, roc_auc_score
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.multiclass import OneVsOneClassifier
 from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -224,3 +225,32 @@ plot_digits(X_ba[:25], images_per_row=5)
 plt.subplot(224)
 plot_digits(X_bb[:25], images_per_row=5)
 plt.show()
+
+# ####### Multilabel Classification ####### #
+y_train_large = (y_train >= 7)
+y_train_odd = (y_train % 2 == 1)
+y_multilabel = np.c_[y_train_large, y_train_odd]
+
+np.shape(y_train_large)
+np.shape(y_train_odd)
+np.shape(y_multilabel)
+
+knn_clf = KNeighborsClassifier()
+knn_clf.fit(X_train, y_multilabel)
+knn_clf.predict([some_digit])
+
+y_train_knn_pred = cross_val_predict(knn_clf, X_train, y_train, cv=3)
+f1_score(y_train, y_train_knn_pred, average='macro')
+
+
+# ####### Multioutput Classification ####### #
+noise = np.random.randint(0, 100, (len(X_train), 784))
+X_train_mod = X_train + noise
+noise = np.random.randint(0, 100, (len(X_test), 784))
+X_test_mod = X_test + noise
+y_train_mod = X_train
+y_test_mod = X_test
+
+knn_clf.fit(X_train_mod, y_train_mod)
+clean_digit = knn_clf.predict([X_test_mod[some_index]])
+plot_digit(clean_digit)
