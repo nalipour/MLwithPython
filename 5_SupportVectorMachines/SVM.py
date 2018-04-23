@@ -94,3 +94,13 @@ def plot_predictions(clf, axes):
 
 plot_predictions(poly_kernel_svm_clf, [-1.5, 2.5, -1, 1.5])
 plot_dataset(X, y, [-1.5, 2.5, -1, 1.5])
+
+
+# ### Gaussian RBF Kernel ### #
+rbf_kernel_svm_clf = Pipeline((
+    ('scaler', StandardScaler()),
+    ('svm_clf', SVC(kernel='rbf', gamma=5, C=0.001))
+))
+rbf_kernel_svm_clf.fit(X, y)
+plot_predictions(rbf_kernel_svm_clf, [-1.5, 2.5, -1, 1.5])
+plot_dataset(X, y, [-1.5, 2.5, -1, 1.5])
