@@ -5,6 +5,8 @@ from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
 from sklearn.datasets import make_moons
 from sklearn.metrics import accuracy_score
+from sklearn.ensemble import BaggingClassifier
+from sklearn.tree import DecisionTreeClassifier
 
 # Data set
 X, y = make_moons(n_samples=500, noise=0.30, random_state=42)
@@ -25,3 +27,11 @@ for clf in (log_clf, rnd_clf, svm_clf, voting_clf):
     clf.fit(X_train, y_train)
     y_pred = clf.predict(X_test)
     print(clf.__class__.__name__, accuracy_score(y_test, y_pred))
+
+
+# ### Bagging and pasting ### #
+bag_clf = BaggingClassifier(
+    DecisionTreeClassifier(), n_estimators=500,
+    max_samples=100, bootstrap=True, n_jobs=-1)
+bag_clf.fit(X_train, y_train)
+y_pred = bag_clf.predict(X_test)
