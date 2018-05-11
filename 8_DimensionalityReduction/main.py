@@ -2,6 +2,9 @@ from sklearn.decomposition import PCA
 from six.moves import urllib
 from sklearn.datasets import fetch_mldata
 from sklearn.model_selection import train_test_split
+from sklearn.decomposition import IncrementalPCA
+from sklearn.decomposition import KernelPCA
+from sklearn.datasets import make_swiss_roll
 
 import numpy as np
 import matplotlib
@@ -28,7 +31,7 @@ ax.scatter(X[:, 0], X[:, 1], X[:, 2])
 pca = PCA(n_components=2)
 X2D = pca.fit_transform(X)
 
-plt.plot(X2D[:,0], X2D[:,1], 'o')
+plt.plot(X2D[:, 0], X2D[:, 1], 'o')
 
 # Access PCA components
 pca.components_.T[:, 0]
@@ -73,3 +76,56 @@ plt.title("Original", fontsize=16)
 plt.subplot(122)
 plot_digits(X_recovered[::2100])
 plt.title("Compressed", fontsize=16)
+
+
+# ### Incremental PCA ### #
+filename = 'my_mnist.data'
+m, n = X_train.shape
+
+X_mm = np.memmap(filename, dtype='float32', mode='write', shape=(m, n))
+X_mm[:] = X_train
+del X_mm
+
+X_mm = np.memmap(filename, dtype="float32", mode="readonly", shape=(m, n))
+
+n_batches = 100
+batch_size = m // n_batches
+inc_pca = IncrementalPCA(n_components=154, batch_size=batch_size)
+inc_pca.fit(X_mm)
+
+
+# ### Randomised PCA ### #
+rnd_pca = PCA(n_components=154, svd_solver='randomized')
+X_reduced = rnd_pca.fit_transform(X_train)
+
+
+# ### Kernel PCA ### #
+X, t = make_swiss_roll(n_samples=1000, noise=0.2, random_state=42)
+rbf_pca = KernelPCA(n_components=2, kernel='rbf', gamma=0.04)
+X_reduced = rbf_pca.fit_transform(X)
+
+
+lin_pca = KernelPCA(n_components=2, kernel="linear",
+                    fit_inverse_transform=True)
+rbf_pca = KernelPCA(n_components=2, kernel="rbf",
+                    gamma=0.0433, fit_inverse_transform=True)
+sig_pca = KernelPCA(n_components=2, kernel="sigmoid",
+                    gamma=0.001, coef0=1, fit_inverse_transform=True)
+
+y = t > 6.9
+
+plt.figure(figsize=(11, 4))
+for subplot, pca, title in ((131, lin_pca, "Linear kernel"), (132, rbf_pca, "RBF kernel, $\gamma=0.04$"), (133, sig_pca, "Sigmoid kernel, $\gamma=10^{-3}, r=1$")):
+    X_reduced = pca.fit_transform(X)
+    if subplot == 132:
+        X_reduced_rbf = X_reduced
+
+    plt.subplot(subplot)
+    plt.title(title, fontsize=14)
+    plt.scatter(X_reduced[:, 0], X_reduced[:, 1], c=t, cmap=plt.cm.hot)
+    plt.xlabel("$z_1$", fontsize=18)
+    if subplot == 131:
+        plt.ylabel("$z_2$", fontsize=18, rotation=0)
+    plt.grid(True)
+
+plt.show()
