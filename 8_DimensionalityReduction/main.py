@@ -5,6 +5,11 @@ from sklearn.model_selection import train_test_split
 from sklearn.decomposition import IncrementalPCA
 from sklearn.decomposition import KernelPCA
 from sklearn.datasets import make_swiss_roll
+from sklearn.model_selection import GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import mean_squared_error
+from sklearn.manifold import LocallyLinearEmbedding
 
 import numpy as np
 import matplotlib
@@ -127,5 +132,41 @@ for subplot, pca, title in ((131, lin_pca, "Linear kernel"), (132, rbf_pca, "RBF
     if subplot == 131:
         plt.ylabel("$z_2$", fontsize=18, rotation=0)
     plt.grid(True)
+
+plt.show()
+
+
+# ### Selecting a kernel and tuning hyperparameters ### #
+clf = Pipeline([
+    ('kpca', KernelPCA(n_components=2)),
+    ('log_reg', LogisticRegression())
+])
+
+param_grid = [{
+    'kpca__gamma': np.linspace(0.03, 0.05, 10),
+    'kpca__kernel': ['rbf', 'sigmoid']
+}]
+
+grid_search = GridSearchCV(clf, param_grid, cv=3)
+grid_search.fit(X, y)
+print(grid_search.best_params_)
+
+# Pre-image
+rbf_pca = KernelPCA(n_components=2, kernel='rbf', gamma=0.0433,
+                    fit_inverse_transform=True)
+X_reduced = rbf_pca.fit_transform(X)
+X_preimage = rbf_pca.inverse_transform(X_reduced)
+mean_squared_error(X, X_preimage)
+
+
+# ### Locally Linear Embedding (LLE) ### #
+lle = LocallyLinearEmbedding(n_components=2, n_neighbors=10)
+X_reduced = lle.fit_transform(X)
+plt.title('Unrolled swiss roll using LLE', fontsize=14)
+plt.scatter(X_reduced[:, 0], X_reduced[:, 1], c=t, cmap=plt.cm.hot)
+plt.xlabel('$z_1$', fontsize=18)
+plt.ylabel('$z_2$', fontsize=18)
+plt.axis([-0.065, 0.055, -0.1, 0.12])
+plt.grid(True)
 
 plt.show()
