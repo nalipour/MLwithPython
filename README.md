@@ -1,2 +1,3 @@
 # MLwithPython
-Personal projects in ML using Scikit-Learn and TensorFlow
+Learning of Scikit-Learn and TensorFlow with examples from Aurélien Géron's book
+
