@@ -71,3 +71,4 @@ with tf.Session() as sess:
 
 
 [v.name for v in tf.trainable_variables()]
+[v.name for v in tf.global_variables()]
