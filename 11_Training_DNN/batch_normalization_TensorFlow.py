@@ -68,3 +68,6 @@ with tf.Session() as sess:
         print(epoch, 'Train accuracy: ', acc_train, 'Test accuracy:', acc_test)
 
     save_path = saver.save(sess, './my_model_final.ckpt')
+
+
+[v.name for v in tf.trainable_variables()]
